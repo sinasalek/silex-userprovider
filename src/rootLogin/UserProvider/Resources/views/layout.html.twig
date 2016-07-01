@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ app.request.locale }}">
+<html lang="{{ global.request.locale }}">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -26,10 +26,10 @@
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <ul class="nav navbar-nav navbar-right">
                         <li><a href="{{ path('user.list') }}">List users</a></li>
-                        {% if app.user %}
+                        {% if global.user %}
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                    {{ 'Hello, %name%!' | trans({'%name%': app.user.displayName }, 'messages') }}
+                                    {{ 'Hello, %name%!' | trans({'%name%': global.user.displayName }, 'messages') }}
                                     <span class="caret"></span>
                                 </a>
                                 <ul class="dropdown-menu" role="menu">
@@ -49,8 +49,8 @@
         </nav>
 
         <div class="container">
-            {% if app.session.flashbag.has('alert') %}
-                {% for flashMessage in app.session.flashbag.get('alert') %}
+            {% if global.session.flashbag.has('alert') %}
+                {% for flashMessage in global.session.flashbag.get('alert') %}
                     <div class="alert alert-info">{{ flashMessage }}</div>
                 {% endfor %}
             {% endif %}

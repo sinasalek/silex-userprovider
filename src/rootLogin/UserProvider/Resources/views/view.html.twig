@@ -30,7 +30,7 @@
             {{ 'Registered' | trans({}, 'messages') }} {{ user.timeCreated|date('F j, Y') }}
         </div>
 
-        {% if user == app.user %}
+        {% if user == global.user %}
             <div style="margin-top: 10px;">
                 <a href="{{ path('user.profile-edit') }}"><span class="glyphicon glyphicon-edit" style="margin-right: 5px;"></span>{{ 'Edit' | trans({}, 'messages') }}</a> | <a href="{{ path('user.change-password') }}"><span class="glyphicon glyphicon-edit" style="margin-right: 5px;"></span>{{ 'Change password' | trans({}, 'messages') }}</a>
             </div>

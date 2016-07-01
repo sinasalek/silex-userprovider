@@ -4,8 +4,8 @@
 
 {% block content %}
 
-    {% if app.user %}
-        <p>Hello, {{ app.user.displayName }}.</p>
+    {% if global.user %}
+        <p>Hello, {{ global.user.displayName }}.</p>
         <p><a href="{{ path('user.logout') }}">Sign out</a></p>
 
     {% else %}

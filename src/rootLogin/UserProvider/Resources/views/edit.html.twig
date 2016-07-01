@@ -6,7 +6,7 @@
 
 {% block content %}
     <h1>
-        {% if app.user == user %}
+        {% if global.user == user %}
             {{ 'Edit your profile' | trans({}, 'messages') }}
         {% else %}
             {{ 'Edit User' | trans({}, 'messages') }}: {{ user.displayName }}

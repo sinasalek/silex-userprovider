@@ -5,8 +5,8 @@
 {% block title %}{{ 'Register' | trans({}, 'messages') }}{% endblock %}
 
 {% block content %}
-    {% if app.user %}
-        <p>{{ 'Hello, %name%. You are already registered and signed in.' | trans({ '%name%': app.user.displayName }, 'messages') }}</p>
+    {% if global.user %}
+        <p>{{ 'Hello, %name%. You are already registered and signed in.' | trans({ '%name%': global.user.displayName }, 'messages') }}</p>
         <p><a href="{{ path('user.logout') }}">{{ 'Sign out' | trans({}, 'messages') }}</a></p>
     {% else %}
         <h1>
