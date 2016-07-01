@@ -68,7 +68,7 @@ class UserProviderControllerProvider implements ControllerProviderInterface
         $controllers->method('GET|POST')->match('/profile/{id}/edit', 'user.controller:editAction')
             ->bind('user.edit')
             ->before(function(Request $request) use ($app) {
-                if (!$app['security']->isGranted('EDIT_USER_ID', $request->get('id'))) {
+                if (!$app['security.authorization_checker']->isGranted('EDIT_USER_ID', $request->get('id'))) {
                     throw new AccessDeniedException();
                 }
             })

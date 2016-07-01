@@ -29,7 +29,7 @@ use Silex\Application;
 use Silex\Api\BootableProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authorization\Voter\RoleHierarchyVoter;
-use Symfony\Component\Security\Core\SecurityContextInterface;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Translation\Loader\YamlFileLoader;
 
 class UserProviderServiceProvider implements ServiceProviderInterface, BootableProviderInterface
@@ -86,14 +86,14 @@ class UserProviderServiceProvider implements ServiceProviderInterface, BootableP
         // It does the same thing as $app['security.last_error'](),
         // except it returns the whole exception instead of just $exception->getMessage()
         $app['user.last_auth_exception'] = $app->protect(function (Request $request) {
-            if ($request->attributes->has(SecurityContextInterface::AUTHENTICATION_ERROR)) {
-                return $request->attributes->get(SecurityContextInterface::AUTHENTICATION_ERROR);
+            if ($request->attributes->has(Security::AUTHENTICATION_ERROR)) {
+                return $request->attributes->get(Security::AUTHENTICATION_ERROR);
             }
 
             $session = $request->getSession();
-            if ($session && $session->has(SecurityContextInterface::AUTHENTICATION_ERROR)) {
-                $exception = $session->get(SecurityContextInterface::AUTHENTICATION_ERROR);
-                $session->remove(SecurityContextInterface::AUTHENTICATION_ERROR);
+            if ($session && $session->has(Security::AUTHENTICATION_ERROR)) {
+                $exception = $session->get(Security::AUTHENTICATION_ERROR);
+                $session->remove(Security::AUTHENTICATION_ERROR);
 
                 return $exception;
             }
@@ -413,7 +413,7 @@ class UserProviderServiceProvider implements ServiceProviderInterface, BootableP
     {
         $app['form.types'] = $app->extend('form.types', function ($types) use ($app) {
             $types[] = new RegisterType();
-            $types[] = new EditType($app['security']);
+            $types[] = new EditType($app['security.authorization_checker']);
             $types[] = new UserRolesType($app['user.options']);
             $types[] = new ChangePasswordType();
             $types[] = new ForgotPasswordType();

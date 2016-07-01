@@ -221,7 +221,7 @@ class UserController
             throw new NotFoundHttpException($this->trans('No user was found with that ID.'));
         }
 
-        if (!$user->isEnabled() && !$app['security']->isGranted('ROLE_ADMIN')) {
+        if (!$user->isEnabled() && !$app['security.authorization_checker']->isGranted('ROLE_ADMIN')) {
             throw new NotFoundHttpException($this->trans('That user is disabled (pending email confirmation).'));
         }
 
@@ -513,7 +513,7 @@ class UserController
         $offset = ($page - 1) * $limit;
 
         $criteria = array();
-        if (!$app['security']->isGranted('ROLE_ADMIN')) {
+        if (!$app['security.authorization_checker']->isGranted('ROLE_ADMIN')) {
             $criteria['isEnabled'] = true;
         }
 

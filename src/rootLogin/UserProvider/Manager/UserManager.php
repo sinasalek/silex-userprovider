@@ -93,10 +93,10 @@ abstract class UserManager implements UserManagerInterface
      */
     public function loginAsUser(User $user)
     {
-        if (null !== ($current_token = $this->app['security']->getToken())) {
-            $providerKey = method_exists($current_token, 'getProviderKey') ? $current_token->getProviderKey() : $current_token->getKey();
+        if (null !== ($current_token = $this->app['security.token_storage']->getToken())) {
+            $providerKey = method_exists($current_token, 'getProviderKey') ? $current_token->getProviderKey() : $current_token->getSecret();
             $token = new UsernamePasswordToken($user, null, $providerKey);
-            $this->app['security']->setToken($token);
+            $this->app['security.token_storage']->setToken($token);
 
             $this->app['user'] = $user;
         }
@@ -231,7 +231,7 @@ abstract class UserManager implements UserManagerInterface
     public function getCurrentUser()
     {
         if ($this->isLoggedIn()) {
-            return $this->app['security']->getToken()->getUser();
+            return $this->app['security.token_storage']->getToken()->getUser();
         }
 
         return null;
@@ -244,12 +244,12 @@ abstract class UserManager implements UserManagerInterface
      */
     function isLoggedIn()
     {
-        $token = $this->app['security']->getToken();
+        $token = $this->app['security.token_storage']->getToken();
         if (null === $token) {
             return false;
         }
 
-        return $this->app['security']->isGranted('IS_AUTHENTICATED_REMEMBERED');
+        return $this->app['security.authorization_checker']->isGranted('IS_AUTHENTICATED_REMEMBERED');
     }
 
     /**
