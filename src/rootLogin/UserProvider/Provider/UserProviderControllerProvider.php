@@ -11,7 +11,7 @@ namespace rootLogin\UserProvider\Provider;
 use Silex\Application;
 use Silex\ControllerCollection;
 use Silex\ServiceControllerResolver;
-use Silex\ControllerProviderInterface;
+use Silex\API\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
