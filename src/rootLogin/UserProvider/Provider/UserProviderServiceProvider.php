@@ -23,14 +23,16 @@ use rootLogin\UserProvider\Lib\TokenGenerator;
 use rootLogin\UserProvider\Manager\DBALUserManager;
 use rootLogin\UserProvider\Manager\OrmUserManager;
 use rootLogin\UserProvider\Voter\EditUserVoter;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 use Silex\Application;
-use Silex\ServiceProviderInterface;
+use Silex\Api\BootableProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authorization\Voter\RoleHierarchyVoter;
 use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\Translation\Loader\YamlFileLoader;
 
-class UserProviderServiceProvider implements ServiceProviderInterface
+class UserProviderServiceProvider implements ServiceProviderInterface, BootableProviderInterface
 {
     /**
      * @var bool
@@ -50,7 +52,7 @@ class UserProviderServiceProvider implements ServiceProviderInterface
      *
      * @param Application $app An Application instance
      */
-    public function register(Application $app)
+    public function register(Container $app)
     {
         $this->setDefaultOptions($app);
         $this->initializeOptions($app);
@@ -61,12 +63,12 @@ class UserProviderServiceProvider implements ServiceProviderInterface
         $this->addFormTypes($app);
 
         // Token generator.
-        $app['user.tokenGenerator'] = $app->share(function($app) { return new TokenGenerator($app['logger']); });
+        $app['user.tokenGenerator'] = function($app) { return new TokenGenerator($app['logger']); };
 
         // Current user.
-        $app['user'] = $app->share(function($app) {
+        $app['user'] = function($app) {
             return ($app['user.manager']->getCurrentUser());
-        });
+        };
 
         // Add a custom security voter to support testing user attributes.
         $app['security.voters'] = $app->extend('security.voters', function($voters) use ($app) {
@@ -97,7 +99,7 @@ class UserProviderServiceProvider implements ServiceProviderInterface
             }
         });
 
-        $app['translator'] = $app->share($app->extend('translator', function($translator, $app) {
+        $app['translator'] = $app->extend('translator', function($translator, $app) {
             $translator->addResource('xliff', __DIR__ . '/../Resources/translations/messages.de.xliff', 'de', 'messages');
             $translator->addResource('xliff', __DIR__ . '/../Resources/translations/validators.de.xliff', 'de', 'validators');
             $translator->addResource('xliff', __DIR__ . '/../Resources/translations/mail.de.xliff', 'de', 'mail');
@@ -109,22 +111,20 @@ class UserProviderServiceProvider implements ServiceProviderInterface
             $translator->addResource('xliff', __DIR__ . '/../Resources/translations/mail.it.xliff', 'it', 'mail');
 
             return $translator;
-        }));
+        });
 
         // If symfony console is available, enable them
         if (isset($app['console.commands'])) {
-            $app['console.commands'] = $app->share(
-                $app->extend('console.commands', function ($commands) use ($app) {
-                    $commands[] = new UserCreateCommand($app);
-                    $commands[] = new UserListCommand($app);
-                    $commands[] = new UserDeleteCommand($app);
-                    $commands[] = new UserRoleAddCommand($app);
-                    $commands[] = new UserRoleListCommand($app);
-                    $commands[] = new UserRoleRemoveCommand($app);
+            $app['console.commands'] = $app->extend('console.commands', function ($commands) use ($app) {
+                $commands[] = new UserCreateCommand($app);
+                $commands[] = new UserListCommand($app);
+                $commands[] = new UserDeleteCommand($app);
+                $commands[] = new UserRoleAddCommand($app);
+                $commands[] = new UserRoleListCommand($app);
+                $commands[] = new UserRoleRemoveCommand($app);
 
-                    return $commands;
-                })
-            );
+                return $commands;
+            });
         }
     }
 
@@ -255,7 +255,7 @@ class UserProviderServiceProvider implements ServiceProviderInterface
         ];
     }
 
-    protected function initializeOptions(Application $app)
+    protected function initializeOptions(Container $app)
     {
         $app['user.options.init'] = $app->protect(function() use ($app) {
             $options = $app['user.options.default'];
@@ -287,9 +287,9 @@ class UserProviderServiceProvider implements ServiceProviderInterface
         });
     }
 
-    protected function initializeUserManager(Application $app)
+    protected function initializeUserManager(Container $app)
     {
-        $app['user.manager'] = $app->share(function($app) {
+        $app['user.manager'] = function($app) {
             $app['user.options.init']();
 
             if($this->useOrm($app)) {
@@ -306,7 +306,7 @@ class UserProviderServiceProvider implements ServiceProviderInterface
             }
 
             return $userManager;
-        });
+        };
 
         // Enable orm mappings
         if($this->useOrm($app)) {
@@ -314,9 +314,9 @@ class UserProviderServiceProvider implements ServiceProviderInterface
         }
     }
 
-    protected function initializeUserController(Application $app)
+    protected function initializeUserController(Container $app)
     {
-        $app['user.controller'] = $app->share(function ($app) {
+        $app['user.controller'] = function ($app) {
             $app['user.options.init']();
 
             $controller = new UserController($app['user.manager'], $app['form.factory'], $app['translator']);
@@ -327,12 +327,12 @@ class UserProviderServiceProvider implements ServiceProviderInterface
             $controller->setForms($app['user.options']['forms']);
 
             return $controller;
-        });
+        };
     }
 
-    protected function initializeMailer(Application $app)
+    protected function initializeMailer(Container $app)
     {
-        $app['user.mailer'] = $app->share(function($app) {
+        $app['user.mailer'] = function($app) {
             $app['user.options.init']();
 
             $missingDeps = array();
@@ -354,44 +354,44 @@ class UserProviderServiceProvider implements ServiceProviderInterface
             }
 
             return $mailer;
-        });
+        };
     }
 
-    protected function addDoctrineOrmMappings(Application $app)
+    protected function addDoctrineOrmMappings(Container $app)
     {
         if (!isset($app['orm.ems.options'])) {
-            $app['orm.ems.options'] = $app->share(function () use ($app) {
+            $app['orm.ems.options'] = function () use ($app) {
                 $options = [
                     'default' => $app['orm.em.default_options']
                 ];
                 return $options;
-            });
+            };
         }
 
-        $app['orm.ems.options'] = $app->share($app->extend('orm.ems.options', function (array $options) {
+        $app['orm.ems.options'] = $app->extend('orm.ems.options', function (array $options) {
             $options['default']['mappings'][] = [
                 'type' => 'yml',
                 'namespace' => 'rootLogin\UserProvider\Entity',
                 'path' => $this->getEntityMappingsPath()
             ];
             return $options;
-        }));
+        });
     }
 
-    protected function addValidators(Application $app)
+    protected function addValidators(Container $app)
     {
-        $app['validator.emailisunique'] = $app->share(function ($app) {
+        $app['validator.emailisunique'] = function ($app) {
             $validator =  new EMailIsUniqueValidator();
             $validator->setUserManager($app['user.manager']);
 
             return $validator;
-        });
-        $app['validator.emailexists'] = $app->share(function ($app) {
+        };
+        $app['validator.emailexists'] = function ($app) {
             $validator =  new EMailExistsValidator();
             $validator->setUserManager($app['user.manager']);
 
             return $validator;
-        });
+        };
 
         if(is_array($app['validator.validator_service_ids'])) {
             $app['validator.validator_service_ids'] = array_merge(
@@ -409,9 +409,9 @@ class UserProviderServiceProvider implements ServiceProviderInterface
         }
     }
 
-    protected function addFormTypes(Application $app)
+    protected function addFormTypes(Container $app)
     {
-        $app['form.types'] = $app->share($app->extend('form.types', function ($types) use ($app) {
+        $app['form.types'] = $app->extend('form.types', function ($types) use ($app) {
             $types[] = new RegisterType();
             $types[] = new EditType($app['security']);
             $types[] = new UserRolesType($app['user.options']);
@@ -420,7 +420,7 @@ class UserProviderServiceProvider implements ServiceProviderInterface
             $types[] = new ResetPasswordType();
 
             return $types;
-        }));
+        });
     }
 
     /**
