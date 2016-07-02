@@ -48,10 +48,35 @@ class DBALUserManager extends UserManager
     protected $userTableName = 'users';
 
     /** @var string */
+    protected $quotedUserTableName = 'users';
+
+    /** @var string */
     protected $userCustomFieldsTableName = 'user_custom_fields';
+
+    /** @var string */
+    protected $quotedUserCustomFieldsTableName = 'user_custom_fields';
 
     /** @var array */
     protected $userColumns = array(
+        'id' => 'id',
+        'email' => 'email',
+        'password' => 'password',
+        'salt' => 'salt',
+        'roles' => 'roles',
+        'name' => 'name',
+        'time_created' => 'time_created',
+        'username' => 'username',
+        'isEnabled' => 'isEnabled',
+        'confirmationToken' => 'confirmationToken',
+        'timePasswordResetRequested' => 'timePasswordResetRequested',
+        //Custom Fields
+        'user_id' => 'user_id',
+        'attribute' => 'attribute',
+        'value' => 'value',
+    );
+
+    /** @var array */
+    protected $quotedUserColumns = array(
         'id' => 'id',
         'email' => 'email',
         'password' => 'password',
@@ -83,7 +108,7 @@ class DBALUserManager extends UserManager
     public function loadUserByUsername($username)
     {
         if (strpos($username, '@') !== false) {
-            $user = $this->findOneBy(array($this->getUserColumns('email') => $username));
+            $user = $this->findOneBy(array($this->userColumns['email'] => $username));
             if (!$user) {
                 throw new UsernameNotFoundException(sprintf('Email "%s" does not exist.', $username));
             }
@@ -91,7 +116,7 @@ class DBALUserManager extends UserManager
             return $user;
         }
 
-        $user = $this->findOneBy(array($this->getUserColumns('username') => $username));
+        $user = $this->findOneBy(array($this->userColumns['username'] => $username));
         if (!$user) {
             throw new UsernameNotFoundException(sprintf('Username "%s" does not exist.', $username));
         }
@@ -124,10 +149,10 @@ class DBALUserManager extends UserManager
         // Test for new columns added in v2.0.
         // If they're missing, throw an exception and explain that migration is needed.
         foreach (array(
-                    $this->getUserColumns('username'),
-                    $this->getUserColumns('isEnabled'),
-                    $this->getUserColumns('confirmationToken'),
-                    $this->getUserColumns('timePasswordResetRequested')
+                    $this->userColumns['username'],
+                    $this->userColumns['isEnabled'],
+                    $this->userColumns['confirmationToken'],
+                    $this->userColumns['timePasswordResetRequested']
                 ) as $col) {
             if (!array_key_exists($col, $data)) {
                 throw new \RuntimeException('Internal error: database schema appears out of date.');
@@ -165,7 +190,7 @@ class DBALUserManager extends UserManager
      */
     public function getUser($id)
     {
-        return $this->findOneBy(array($this->getUserColumns('id') => $id));
+        return $this->findOneBy(array($this->userColumns['id'] => $id));
     }
 
     /**
@@ -188,9 +213,9 @@ class DBALUserManager extends UserManager
     public function findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
     {
         // Check the identity map first.
-        if (array_key_exists($this->getUserColumns('id'), $criteria) 
-            && array_key_exists($criteria[$this->getUserColumns('id')], $this->identityMap)) {
-            return array($this->identityMap[$criteria[$this->getUserColumns('id')]]);
+        if (array_key_exists($this->userColumns['id'], $criteria)
+            && array_key_exists($criteria[$this->userColumns['id']], $this->identityMap)) {
+            return array($this->identityMap[$criteria[$this->userColumns['id']]]);
         }
 
         list ($common_sql, $params) = $this->createCommonFindSql($criteria);
@@ -208,13 +233,12 @@ class DBALUserManager extends UserManager
         }
 
         $data = $this->conn->fetchAll($sql, $params);
-
         $users = array();
         foreach ($data as $userData) {
-            if (array_key_exists($userData[$this->getUserColumns('id')], $this->identityMap)) {
-                $user = $this->identityMap[$userData[$this->getUserColumns('id')]];
+            if (array_key_exists($userData[$this->userColumns['id']], $this->identityMap)) {
+                $user = $this->identityMap[$userData[$this->userColumns['id']]];
             } else {
-                $userData['customFields'] = $this->getUserCustomFields($userData[$this->getUserColumns('id')]);
+                $userData['customFields'] = $this->getUserCustomFields($userData[$this->userColumns['id']]);
                 $user = $this->hydrateUser($userData);
                 $this->identityMap[$user->getId()] = $user;
             }
@@ -232,9 +256,9 @@ class DBALUserManager extends UserManager
     {
         $customFields = array();
 
-        $rows = $this->conn->fetchAll('SELECT * FROM ' . $this->conn->quoteIdentifier($this->userCustomFieldsTableName). ' WHERE user_id = ?', array($userId));
+        $rows = $this->conn->fetchAll('SELECT * FROM ' . $this->quotedUserCustomFieldsTableName. ' WHERE ' . $this->getUserColumns('user_id') . ' = ?', array($userId));
         foreach ($rows as $row) {
-            $customFields[$row[$this->getUserColumns('attribute')]] = $row[$this->getUserColumns('value')];
+            $customFields[$row[$this->userColumns['attribute']]] = $row[$this->userColumns['value']];
         }
 
         return $customFields;
@@ -250,17 +274,17 @@ class DBALUserManager extends UserManager
     {
         $params = array();
 
-        $sql = 'FROM ' . $this->conn->quoteIdentifier($this->userTableName). ' ';
+        $sql = 'FROM ' . $this->quotedUserTableName. ' ';
         // JOIN on custom fields, if needed.
         if (array_key_exists('customFields', $criteria)) {
             $i = 0;
             foreach ($criteria['customFields'] as $attribute => $value) {
                 $i++;
                 $alias = 'custom' . $i;
-                $sql .= 'JOIN ' . $this->conn->quoteIdentifier($this->userCustomFieldsTableName). ' ' . $alias . ' ';
-                $sql .= 'ON ' . $this->conn->quoteIdentifier($this->userTableName). '.' . $this->getUserColumns('id') . ' = ' . $alias . '.'. $this->getUserColumns('user_id').' ';
-                $sql .= 'AND ' . $alias . '.'.$this->getUserColumns('attribute').' = :attribute' . $i . ' ';
-                $sql .= 'AND ' . $alias . '.'.$this->getUserColumns('value').' = :value' . $i . ' ';
+                $sql .= 'JOIN ' . $this->quotedUserCustomFieldsTableName. ' ' . $alias . ' ';
+                $sql .= 'ON ' . $this->quotedUserTableName. '.' . $this->quotedUserColumns['id'] . ' = ' . $alias . '.'. $this->quotedUserColumns['user_id'] . ' ';
+                $sql .= 'AND ' . $alias . '.' . $this->quotedUserColumns['attribute'] . ' = :attribute' . $i . ' ';
+                $sql .= 'AND ' . $alias . '.' . $this->quotedUserColumns['value'] . ' = :value' . $i . ' ';
                 $params['attribute' . $i] = $attribute;
                 $params['value' . $i] = $value;
             }
@@ -312,10 +336,10 @@ class DBALUserManager extends UserManager
     {
         $this->dispatcher->dispatch(UserEvents::BEFORE_INSERT, new UserEvent($user));
 
-        $sql = 'INSERT INTO ' . $this->conn->quoteIdentifier($this->userTableName) . '
-            ('.$this->getUserColumns('email').', '.$this->getUserColumns('password').', '.$this->getUserColumns('salt').', '.$this->getUserColumns('name').
-                ', '.$this->getUserColumns('roles').', '.$this->getUserColumns('time_created').', '.$this->getUserColumns('username').', '.$this->getUserColumns('isEnabled').
-                ', '.$this->getUserColumns('confirmationToken').', '.$this->getUserColumns('timePasswordResetRequested').')
+        $sql = 'INSERT INTO ' . $this->quotedUserTableName . '
+            ('.$this->quotedUserColumns['email'].', '.$this->quotedUserColumns['password'].', '.$this->quotedUserColumns['salt'].', '.$this->quotedUserColumns['name'].
+                ', '.$this->quotedUserColumns['roles'].', '.$this->quotedUserColumns['time_created'].', '.$this->quotedUserColumns['username'].', '.$this->quotedUserColumns['isEnabled'].
+                ', '.$this->quotedUserColumns['confirmationToken'].', '.$this->quotedUserColumns['timePasswordResetRequested'].')
             VALUES (:email, :password, :salt, :name, :roles, :timeCreated, :username, :isEnabled, :confirmationToken, :timePasswordResetRequested) ';
 
         $timePasswordResetRequested = 0;
@@ -356,18 +380,18 @@ class DBALUserManager extends UserManager
     {
         $this->dispatcher->dispatch(UserEvents::BEFORE_UPDATE, new UserEvent($user));
 
-        $sql = 'UPDATE ' . $this->conn->quoteIdentifier($this->userTableName). '
-            SET '.$this->getUserColumns('email').' = :email
-            , '.$this->getUserColumns('password').' = :password
-            , '.$this->getUserColumns('salt').' = :salt
-            , '.$this->getUserColumns('name').' = :name
-            , '.$this->getUserColumns('roles').' = :roles
-            , '.$this->getUserColumns('time_created').' = :timeCreated
-            , '.$this->getUserColumns('username').' = :username
-            , '.$this->getUserColumns('isEnabled').' = :isEnabled
-            , '.$this->getUserColumns('confirmationToken').' = :confirmationToken
-            , '.$this->getUserColumns('timePasswordResetRequested').' = :timePasswordResetRequested
-            WHERE '.$this->getUserColumns('id').' = :id';
+        $sql = 'UPDATE ' . $this->quotedUserTableName. '
+            SET '.$this->quotedUserColumns['email'].' = :email
+            , '.$this->quotedUserColumns['password'].' = :password
+            , '.$this->quotedUserColumns['salt'].' = :salt
+            , '.$this->quotedUserColumns['name'].' = :name
+            , '.$this->quotedUserColumns['roles'].' = :roles
+            , '.$this->quotedUserColumns['time_created'].' = :timeCreated
+            , '.$this->quotedUserColumns['username'].' = :username
+            , '.$this->quotedUserColumns['isEnabled'].' = :isEnabled
+            , '.$this->quotedUserColumns['confirmationToken'].' = :confirmationToken
+            , '.$this->quotedUserColumns['timePasswordResetRequested'].' = :timePasswordResetRequested
+            WHERE '.$this->quotedUserColumns['id'].' = :id';
 
         $timePasswordResetRequested = 0;
         if($user->getTimePasswordResetRequested() !== null) {
@@ -400,12 +424,12 @@ class DBALUserManager extends UserManager
      */
     protected function saveUserCustomFields(LegacyUser $user)
     {
-        $this->conn->executeUpdate('DELETE FROM ' . $this->conn->quoteIdentifier($this->userCustomFieldsTableName). ' 
-            WHERE '.$this->getUserColumns('user_id').' = ?', array($user->getId()));
+        $this->conn->executeUpdate('DELETE FROM ' . $this->quotedUserCustomFieldsTableName. '
+            WHERE '.$this->quotedUserColumns['user_id'].' = ?', array($user->getId()));
 
         foreach ($user->getCustomFields() as $attribute => $value) {
-            $this->conn->executeUpdate('INSERT INTO ' . $this->conn->quoteIdentifier($this->userCustomFieldsTableName). 
-                    ' ('.$this->getUserColumns('user_id').', '.$this->getUserColumns('attribute').', '.$this->getUserColumns('value').') VALUES (?, ?, ?) ',
+            $this->conn->executeUpdate('INSERT INTO ' . $this->quotedUserCustomFieldsTableName.
+                    ' ('.$this->quotedUserColumns['user_id'].', '.$this->quotedUserColumns['attribute'].', '.$this->quotedUserColumns['value'].') VALUES (?, ?, ?) ',
                 array($user->getId(), $attribute, $value));
         }
     }
@@ -421,8 +445,8 @@ class DBALUserManager extends UserManager
 
         $this->clearIdentityMap($user);
 
-        $this->conn->executeUpdate('DELETE FROM ' . $this->conn->quoteIdentifier($this->userTableName). ' WHERE '.$this->getUserColumns('id').' = ?', array($user->getId()));
-        $this->conn->executeUpdate('DELETE FROM ' . $this->conn->quoteIdentifier($this->userCustomFieldsTableName). ' WHERE '.$this->getUserColumns('user_id').' = ?', array($user->getId()));
+        $this->conn->executeUpdate('DELETE FROM ' . $this->quotedUserTableName. ' WHERE '.$this->quotedUserColumns['id'].' = ?', array($user->getId()));
+        $this->conn->executeUpdate('DELETE FROM ' . $this->quotedUserCustomFieldsTableName. ' WHERE '.$this->quotedUserColumns['user_id'].' = ?', array($user->getId()));
 
         $this->dispatcher->dispatch(UserEvents::AFTER_DELETE, new UserEvent($user));
     }
@@ -435,7 +459,7 @@ class DBALUserManager extends UserManager
         //$errors = $user->validate();
 
         // Ensure email address is unique.
-        $duplicates = $this->findBy(array($this->getUserColumns('email') => $user->getEmail()));
+        $duplicates = $this->findBy(array($this->userColumns['email'] => $user->getEmail()));
         if (!empty($duplicates)) {
             foreach ($duplicates as $dup) {
                 if ($user->getId() && $dup->getId() == $user->getId()) {
@@ -447,7 +471,7 @@ class DBALUserManager extends UserManager
 
         // Ensure username is unique or null.
         if($user->hasRealUsername()) {
-            $duplicates = $this->findBy(array($this->getUserColumns('username') => $user->getRealUsername()));
+            $duplicates = $this->findBy(array($this->userColumns['username'] => $user->getRealUsername()));
             if (!empty($duplicates)) {
                 foreach ($duplicates as $dup) {
                     if ($user->getId() && $dup->getId() == $user->getId()) {
@@ -488,6 +512,7 @@ class DBALUserManager extends UserManager
     public function setUserTableName($userTableName)
     {
         $this->userTableName = $userTableName;
+        $this->quotedUserTableName = $this->conn->quoteIdentifier($userTableName);
     }
 
     public function getUserTableName()
@@ -497,24 +522,28 @@ class DBALUserManager extends UserManager
 
     public function setUserColumns(array $userColumns){
         $conn = $this->conn;
-        //Escape the column names
-
-        $escapedUserColumns = array_map(function($column) use ($conn){
-            return $conn->quoteIdentifier($column,\PDO::PARAM_STR);
-        }, $userColumns);
 
         //Merge the existing column names
-        $this->userColumns = array_merge($this->userColumns, $escapedUserColumns);
+        $this->userColumns = array_merge($this->userColumns, $userColumns);
+
+        //Escape the column names
+        $this->quotedUserColumns = array_map(function($column) use ($conn) {
+            return $conn->quoteIdentifier($column,\PDO::PARAM_STR);
+        }, $this->userColumns);
     }
 
-    public function getUserColumns($column = ""){
-        if ($column == "") return $this->userColumns;
-        else return $this->userColumns[$column];
+    public function getUserColumns($column = "")
+    {
+        if ($column == "") {
+            return $this->userColumns;
+        }
+        return $this->userColumns[$column];
     }
 
     public function setUserCustomFieldsTableName($userCustomFieldsTableName)
     {
         $this->userCustomFieldsTableName = $userCustomFieldsTableName;
+        $this->quotedUserCustomFieldsTableName = $this->conn->quoteIdentifier($userCustomFieldsTableName);
     }
 
     public function getUserCustomFieldsTableName()
