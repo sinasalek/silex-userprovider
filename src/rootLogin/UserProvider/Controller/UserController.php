@@ -28,6 +28,11 @@ use rootLogin\UserProvider\Entity\User;
 use rootLogin\UserProvider\Form\Model\PasswordChange;
 use rootLogin\UserProvider\Form\Model\PasswordForgotten;
 use rootLogin\UserProvider\Form\Model\PasswordReset;
+use rootLogin\UserProvider\Form\Type\RegisterType;
+use rootLogin\UserProvider\Form\Type\EditType;
+use rootLogin\UserProvider\Form\Type\ChangePasswordType;
+use rootLogin\UserProvider\Form\Type\ForgotPasswordType;
+use rootLogin\UserProvider\Form\Type\ResetPasswordType;
 use rootLogin\UserProvider\Interfaces\UserManagerInterface;
 use Silex\Application;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -88,11 +93,11 @@ class UserController
      * @var array
      */
     protected $forms = [
-        'register' => 'rup_register',
-        'edit' => 'rup_edit',
-        'change_password' => 'rup_change_password',
-        'forgot_password' => 'rup_forgot_password',
-        'reset_password' => 'rup_reset_password'
+        'register' => RegisterType::class,
+        'edit' => EditType::class,
+        'change_password' => ChangePasswordType::class,
+        'forgot_password' => ForgotPasswordType::class,
+        'reset_password' => ResetPasswordType::class
     ];
 
     protected $isUsernameRequired = false;

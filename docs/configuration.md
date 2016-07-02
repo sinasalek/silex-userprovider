@@ -25,11 +25,11 @@ $app['user.options'] = [
 
             // Specify the forms
             'forms' => [
-                'register' => 'rup_register',
-                'edit' => 'rup_edit',
-                'change_password' => 'rup_change_password',
-                'forgot_password' => 'rup_forgot_password',
-                'reset_password' => 'rup_reset_password'
+                'register' => RegisterType::class,
+                'edit' => EditType::class,
+                'change_password' => ChangePasswordType::class,
+                'forgot_password' => ForgotPasswordType::class,
+                'reset_password' => ResetPasswordType::class
             ],
 
             // Configure the user mailer for sending password reset and email confirmation messages.

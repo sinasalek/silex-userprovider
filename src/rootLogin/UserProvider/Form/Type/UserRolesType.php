@@ -28,7 +28,7 @@ use Doctrine\ORM\EntityManager;
 use rootLogin\UserProvider\Form\DataTransformer\RolesToRoleListTransformer;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class UserRolesType extends AbstractType
@@ -54,7 +54,7 @@ class UserRolesType extends AbstractType
 
         foreach($this->userOptions['roles'] as $role => $description)
         {
-            $builder->add($role, 'checkbox', [
+            $builder->add($role, CheckboxType::class, [
                 'label' => $role
             ]);
         }
@@ -66,7 +66,7 @@ class UserRolesType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'type' => 'checkbox'
+            'type' => CheckboxType::class
         ]);
     }
 

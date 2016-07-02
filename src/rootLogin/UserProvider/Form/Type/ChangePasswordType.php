@@ -26,6 +26,9 @@ namespace rootLogin\UserProvider\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -39,16 +42,16 @@ class ChangePasswordType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('oldPassword', 'password')
-            ->add('newPassword', 'repeated', [
-                'type' => 'password',
+            ->add('oldPassword', PasswordType::class)
+            ->add('newPassword', RepeatedType::class, [
+                'type' => PasswordType::class,
                 'invalid_message' => 'The password fields must match.',
                 'options' => array('attr' => array('class' => 'password-field')),
                 'required' => true,
                 'first_options'  => array('label' => 'New password'),
                 'second_options' => array('label' => 'Repeat new password'),
             ])
-            ->add('save', 'submit')
+            ->add('save', SubmitType::class)
         ;
     }
 

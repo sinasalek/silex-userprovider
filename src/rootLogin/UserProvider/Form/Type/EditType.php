@@ -26,6 +26,9 @@ namespace rootLogin\UserProvider\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class EditType extends AbstractType
@@ -44,14 +47,14 @@ class EditType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('name', 'text')
-            ->add('email', 'email');
+            ->add('name', TextType::class)
+            ->add('email', EmailType::class);
 
         if($this->security->isGranted('ROLE_ADMIN')) {
-            $builder->add('roles', 'user_roles');
+            $builder->add('roles', UserRolesType::class);
         }
 
-        $builder->add('save', 'submit');
+        $builder->add('save', SubmitType::class);
     }
 
     public function configureOptions(OptionsResolver $resolver)
