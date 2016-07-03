@@ -102,7 +102,11 @@ class DBALUserManager extends UserManager
     public function __construct(Application $app)
     {
         parent::__construct($app);
-        $this->conn = $app['db'];
+        if ($app['user.options']['userConnection'] == 'default') {
+            $this->conn = $app['db'];
+        } else {
+            $this->conn = $app['dbs'][$app['user.options']['userConnection']];
+        }
     }
 
     // ----- UserProviderInterface -----

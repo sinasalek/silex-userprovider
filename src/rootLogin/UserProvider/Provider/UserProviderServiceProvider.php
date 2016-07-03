@@ -230,6 +230,9 @@ class UserProviderServiceProvider implements ServiceProviderInterface, BootableP
             // A list of custom fields to support in the edit controller. (dbal mode only)
             'editCustomFields' => [],
 
+            // Override database connection, if necessary. (dbal only)
+            'userConnection' => 'default',
+
             // Override table names, if necessary. (dbal only)
             'userTableName' => 'users',
             'userCustomFieldsTableName' => 'user_custom_fields',
