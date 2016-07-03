@@ -94,12 +94,12 @@ Commandline
 
 If you have enabled the symfony console, as with [saxulum-console](https://github.com/saxulum/saxulum-console) for example, the provider will add some commands to the console:
 
-* `userprovider:create`: Create an user
-* `userprovider:list`: List users
-* `userprovider:delete`: Delete an user
-* `userprovider:role:add`: Add a role to an user
-* `userprovider:role:list`: List user's roles
-* `userprovider:delete`: Remove a role from an user
+* `user:create`: Create a user
+* `user:list`: List users
+* `user:delete`: Delete a user
+* `user:role:add`: Add a role to a user
+* `user:role:list`: List user's roles
+* `user:delete`: Remove a role from a user
 
 Use Doctrine ORM instead of DBAL
 --------------------------------
