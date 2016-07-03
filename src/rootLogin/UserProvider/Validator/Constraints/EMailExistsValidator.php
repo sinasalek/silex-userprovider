@@ -45,7 +45,10 @@ class EMailExistsValidator extends ConstraintValidator
         );
 
         if ($exists === null) {
-            $this->context->addViolationAt('email',$constraint->eMailDoesNotExist, array('{{ email }}' => $passwordForgotten->getEmail()));
+            $this->context->buildViolation($constraint->eMailDoesNotExist)
+                ->atPath('email')
+                ->setParameter('{{ email }}', $passwordForgotten->getEmail())
+                ->addViolation();
 
             return false;
         }
