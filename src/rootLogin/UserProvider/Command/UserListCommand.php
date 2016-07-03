@@ -55,6 +55,7 @@ class UserListCommand extends Command
     {
         $this
             ->setName('user:list')
+            ->setDescription('List all current users')
             ->setHelp(<<<EOT
 The <info>user:list</info> command lists all users.
 EOT

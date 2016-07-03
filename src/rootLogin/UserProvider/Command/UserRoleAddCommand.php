@@ -57,6 +57,7 @@ class UserRoleAddCommand extends Command
     {
         $this
             ->setName('user:role:add')
+            ->setDescription('Add a role to a user')
             ->setDefinition([
                 new InputArgument('email', InputArgument::REQUIRED, 'The email'),
                 new InputArgument('role', InputArgument::REQUIRED, 'The role')

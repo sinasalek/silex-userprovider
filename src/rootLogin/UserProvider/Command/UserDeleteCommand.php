@@ -56,6 +56,7 @@ class UserDeleteCommand extends Command
     {
         $this
             ->setName('user:delete')
+            ->setDescription('Delete an existing user')
             ->setDefinition(array(
                 new InputArgument('email', InputArgument::REQUIRED, 'The email')
             ))

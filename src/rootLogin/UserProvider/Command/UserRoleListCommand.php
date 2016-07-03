@@ -57,6 +57,7 @@ class UserRoleListCommand extends Command
     {
         $this
             ->setName('user:role:list')
+            ->setDescription('List all roles for a user')
             ->setDefinition([
                 new InputArgument('email', InputArgument::REQUIRED, 'The email')
             ])

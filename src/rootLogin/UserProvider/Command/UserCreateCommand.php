@@ -56,6 +56,7 @@ class UserCreateCommand extends Command
     {
         $this
             ->setName('user:create')
+            ->setDescription('Create a new user')
             ->setDefinition(array(
                 new InputArgument('email', InputArgument::REQUIRED, 'The email'),
                 new InputArgument('password', InputArgument::REQUIRED, 'The password')
