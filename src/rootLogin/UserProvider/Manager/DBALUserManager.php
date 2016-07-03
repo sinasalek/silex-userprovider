@@ -94,6 +94,17 @@ class DBALUserManager extends UserManager
         'value' => 'value',
     );
 
+    /**
+     * Constructor.
+     *
+     * @param Application $app
+     */
+    public function __construct(Application $app)
+    {
+        parent::__construct($app);
+        $this->conn = $app['db'];
+    }
+
     // ----- UserProviderInterface -----
 
     /**

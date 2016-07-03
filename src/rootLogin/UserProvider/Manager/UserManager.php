@@ -24,7 +24,6 @@
 
 namespace rootLogin\UserProvider\Manager;
 
-use Doctrine\DBAL\Connection;
 use rootLogin\UserProvider\Entity\User;
 use rootLogin\UserProvider\Interfaces\UserManagerInterface;
 use Silex\Application;
@@ -42,9 +41,6 @@ abstract class UserManager implements UserManagerInterface
 
     /** @var EventDispatcher */
     protected $dispatcher;
-
-    /** @var Connection */
-    protected $conn;
 
     /** @var string */
     protected $userClass = '\rootLogin\UserProvider\Entity\User';
@@ -64,7 +60,6 @@ abstract class UserManager implements UserManagerInterface
     {
         $this->app = $app;
         $this->dispatcher = $app['dispatcher'];
-        $this->conn = $app['db'];
     }
 
     /**
