@@ -73,7 +73,7 @@ $app['user.options'] = array();
 $app['security.firewalls'] = array(
     /* // Ensure that the login page is accessible to all, if you set anonymous => false below.
     'login' => array(
-        'pattern' => '^/user/login$',
+        'pattern' => '(^/user/login$)|(^/user/register$)|(^/user/forgot-password$)',
     ), */
     'secured_area' => array(
         'pattern' => '^.*$',
