@@ -43,7 +43,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\DisabledException;
 use InvalidArgumentException;
 use JasonGrimes\Paginator;
-use Symfony\Component\Translation\Translator;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Controller with actions for handling form-based authentication and user management.
@@ -113,7 +113,7 @@ class UserController
      *
      * @param UserManagerInterface $userManager
      */
-    public function __construct(UserManagerInterface $userManager, FormFactoryInterface $formFactory, Translator $translator)
+    public function __construct(UserManagerInterface $userManager, FormFactoryInterface $formFactory, TranslatorInterface $translator)
     {
         $this->userManager = $userManager;
         $this->formFactory = $formFactory;
