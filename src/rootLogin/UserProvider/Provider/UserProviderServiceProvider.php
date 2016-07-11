@@ -100,6 +100,9 @@ class UserProviderServiceProvider implements ServiceProviderInterface, BootableP
         });
 
         $app['translator'] = $app->extend('translator', function($translator, $app) {
+            $translator->addResource('xliff', __DIR__ . '/../Resources/translations/messages.en.xliff', 'en', 'messages');
+            $translator->addResource('xliff', __DIR__ . '/../Resources/translations/validators.en.xliff', 'en', 'validators');
+            $translator->addResource('xliff', __DIR__ . '/../Resources/translations/mail.en.xliff', 'en', 'mail');
             $translator->addResource('xliff', __DIR__ . '/../Resources/translations/messages.de.xliff', 'de', 'messages');
             $translator->addResource('xliff', __DIR__ . '/../Resources/translations/validators.de.xliff', 'de', 'validators');
             $translator->addResource('xliff', __DIR__ . '/../Resources/translations/mail.de.xliff', 'de', 'mail');
