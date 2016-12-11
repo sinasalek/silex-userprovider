@@ -417,6 +417,9 @@ class UserProviderServiceProvider implements ServiceProviderInterface, BootableP
 
     protected function addFormTypes(Container $app)
     {
+        if (!isset($app['form.types'])) {
+            return;
+        }
         $app['form.types'] = $app->extend('form.types', function ($types) use ($app) {
             $types[] = new RegisterType();
             $types[] = new EditType($app['security.authorization_checker']);
