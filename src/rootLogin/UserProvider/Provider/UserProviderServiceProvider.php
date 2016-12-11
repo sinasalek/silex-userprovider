@@ -99,22 +99,24 @@ class UserProviderServiceProvider implements ServiceProviderInterface, BootableP
             }
         });
 
-        $app['translator'] = $app->extend('translator', function($translator, $app) {
-            $translator->addResource('xliff', __DIR__ . '/../Resources/translations/messages.en.xliff', 'en', 'messages');
-            $translator->addResource('xliff', __DIR__ . '/../Resources/translations/validators.en.xliff', 'en', 'validators');
-            $translator->addResource('xliff', __DIR__ . '/../Resources/translations/mail.en.xliff', 'en', 'mail');
-            $translator->addResource('xliff', __DIR__ . '/../Resources/translations/messages.de.xliff', 'de', 'messages');
-            $translator->addResource('xliff', __DIR__ . '/../Resources/translations/validators.de.xliff', 'de', 'validators');
-            $translator->addResource('xliff', __DIR__ . '/../Resources/translations/mail.de.xliff', 'de', 'mail');
-            $translator->addResource('xliff', __DIR__ . '/../Resources/translations/messages.fr.xliff', 'fr', 'messages');
-            $translator->addResource('xliff', __DIR__ . '/../Resources/translations/validators.fr.xliff', 'fr', 'validators');
-            $translator->addResource('xliff', __DIR__ . '/../Resources/translations/mail.fr.xliff', 'fr', 'mail');
-            $translator->addResource('xliff', __DIR__ . '/../Resources/translations/messages.it.xliff', 'it', 'messages');
-            $translator->addResource('xliff', __DIR__ . '/../Resources/translations/validators.it.xliff', 'it', 'validators');
-            $translator->addResource('xliff', __DIR__ . '/../Resources/translations/mail.it.xliff', 'it', 'mail');
+        if (isset($app['translator'])) {
+            $app['translator'] = $app->extend('translator', function($translator, $app) {
+                $translator->addResource('xliff', __DIR__ . '/../Resources/translations/messages.en.xliff', 'en', 'messages');
+                $translator->addResource('xliff', __DIR__ . '/../Resources/translations/validators.en.xliff', 'en', 'validators');
+                $translator->addResource('xliff', __DIR__ . '/../Resources/translations/mail.en.xliff', 'en', 'mail');
+                $translator->addResource('xliff', __DIR__ . '/../Resources/translations/messages.de.xliff', 'de', 'messages');
+                $translator->addResource('xliff', __DIR__ . '/../Resources/translations/validators.de.xliff', 'de', 'validators');
+                $translator->addResource('xliff', __DIR__ . '/../Resources/translations/mail.de.xliff', 'de', 'mail');
+                $translator->addResource('xliff', __DIR__ . '/../Resources/translations/messages.fr.xliff', 'fr', 'messages');
+                $translator->addResource('xliff', __DIR__ . '/../Resources/translations/validators.fr.xliff', 'fr', 'validators');
+                $translator->addResource('xliff', __DIR__ . '/../Resources/translations/mail.fr.xliff', 'fr', 'mail');
+                $translator->addResource('xliff', __DIR__ . '/../Resources/translations/messages.it.xliff', 'it', 'messages');
+                $translator->addResource('xliff', __DIR__ . '/../Resources/translations/validators.it.xliff', 'it', 'validators');
+                $translator->addResource('xliff', __DIR__ . '/../Resources/translations/mail.it.xliff', 'it', 'mail');
 
-            return $translator;
-        });
+                return $translator;
+            });
+        }
 
         // If symfony console is available, enable them
         if (isset($app['console.commands'])) {
