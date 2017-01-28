@@ -1,9 +1,9 @@
 {
-    "name": "rootlogin/silex-userprovider",
+    "name": "sinasalek/silex-userprovider",
     "type": "library",
     "description": "A simple database-backed user provider for Silex, with associated services and controllers.",
     "keywords": ["silex", "user", "user provider", "silex user provider"],
-    "homepage": "http://github.com/chrootlogin/silex-userprovider",
+    "homepage": "https://github.com/sinasalek/silex-userprovider",
     "license": "LGPL-3.0",
     "authors": [
         {
